@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button, Form } from 'react-bootstrap'
+import { Button } from 'react-bootstrap'
 import LockIcon from '@mui/icons-material/Lock';
 import EmailIcon from '@mui/icons-material/Email';
 import {
@@ -7,10 +7,10 @@ import {
     signInWithEmailAndPassword
 } from '../firebase/firebase';
 import { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import {  useNavigate } from 'react-router';
 import { db, onValue, ref } from '../firebase/firebase'
 import { Link } from 'react-router-dom';
-import { useSelector, useDispatch } from "react-redux";
+import {  useDispatch } from "react-redux";
 
 
 
@@ -19,6 +19,7 @@ export default function SignUp() {
     const dispatch = useDispatch();
     const [email, setEmail] = useState()
     const [password, setPassword] = useState()
+    const [error, setError] = useState()
     const navigation = useNavigate()
     // const dataFromRedux = useSelector((a) => a);
 
@@ -38,7 +39,7 @@ export default function SignUp() {
                         navigation('/', { state: userObj })
                     }
                     dispatch({
-                        type: "DATAFROMSIGNUP",
+                        type: "DATAFROMLOGIN",
                         email,
                         password
                     });
@@ -53,6 +54,7 @@ export default function SignUp() {
             })
             .catch((err) => {
                 console.log(err.message)
+                setError(err.message)
                 setEmail('')
                 setPassword('')
             })
@@ -64,21 +66,24 @@ export default function SignUp() {
         <div style={{ display: "flex", alignItems: 'center', justifyContent: "center", backgroundPosition: "center", marginTop: "100px" }}>
             <form method="post" action="" className="login" style={{ borderRadius: "30px" }}>
                 <header>LOGIN FORM</header>
+                <div className='py-5 my-5 text-danger text-bold' style={{color:'red',paddingBottom:'20px'}}>
+                    {error}
+                </div>
                 <div className="field">
                     <span className='mt-5'>
                         <EmailIcon style={{ marginTop: "10px" }} />
                     </span>
-                    <Form.Control placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} type='email' />
+                    <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} type='email' />
                 </div>
                 <div className="field">
                     <span className='mt-5'>
                         <LockIcon style={{ marginTop: "10px" }} />
                     </span>
-                    <Form.Control placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} type='password' />
+                    <input placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} type='password' />
                 </div>
                 <Button className='submit' onClick={signUp}>Submit</Button>
                 <div className="">
-                    <p>ALready Have an Account? <Link className="link" to="/login">SignUp</Link></p>
+                    <p>Already have an Account? <Link className="link" to="/login">SignUp</Link></p>
                 </div>
             </form>
         </div>

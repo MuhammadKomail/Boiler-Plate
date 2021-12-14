@@ -2,77 +2,96 @@ import React from 'react'
 import { useNavigate } from 'react-router'
 import { useEffect } from 'react'
 import { useLocation } from "react-router";
-import { auth, onAuthStateChanged, signOut } from '../firebase/firebase'
+import {
+    auth,
+    onAuthStateChanged,
+    signOut,
+    ref,
+    db,
+    child,
+    get
+} from '../firebase/firebase'
 import { Layout } from 'antd';
 
-import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
+// import { AppstoreOutlined, MailOutlined, SettingOutlined } from '@ant-design/icons';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
+// import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
+// import useState from 'react'
 
 const settings = ['Logout'];
 
-const { SubMenu } = Menu;
+// const { SubMenu } = Menu;
 // import Button from ''
-const { Title } = Typography;
-const { Header, Footer, Sider, Content } = Layout;
+// const { Title } = Typography;
+// const { Header, Footer, Sider, Content } = Layout;
 
 
 
 export default function Dashboard() {
 
-    const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
-    // console.log()
-    const handleOpenNavMenu = (event) => {
-        setAnchorElNav(event.currentTarget);
-    };
+    const [data, setData] = React.useState([]);
+    // const [data, setData] = useState([])
+
     const handleOpenUserMenu = (event) => {
         setAnchorElUser(event.currentTarget);
     };
 
     const handleCloseNavMenu = () => {
-        setAnchorElNav(null);
     };
 
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
-    // handleClick = e => {
-    //     console.log('click ', e);
-    // };
+
     const navigation = useNavigate();
     const location = useLocation();
+    
+    // const refrence = ref(db, `/users /${loginData.uid}`)
     // console.log(location.state.firstName)
     const logOut = () => {
         signOut(auth)
             .then((success) => { console.log(success) })
             .catch((err) => { console.log(err) })
     }
+    const dbRef = ref(db);
+
+
     useEffect(() => {
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 const uid = user.uid;
-                console.log(uid)
-                console.log(location)
+                get(child(dbRef, `users /${uid}`)).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        console.log(snapshot.val());
+                        setData(snapshot.val())
+                    } else {
+                        console.log("No data available");
+                    }
+                }).catch((error) => {
+                    console.error(error);
+                });
             } else {
                 navigation('/signup')
             }
-        });
-    }, [])
+        }
 
+
+        );
+    }, [])
     return (
         <>
-            {/* <h1>{"username"?location.state.firstName:location.state.firstName}</h1> */}
+            <h1>{data.firstName}</h1>
 
             <Layout>
                 <AppBar position="static">
@@ -88,7 +107,7 @@ export default function Dashboard() {
                             <Box sx={{ flexGrow: 0 }}>
                                 <Tooltip title="Open settings">
                                     <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                        <Avatar alt="K" src="/static/images/avatar/2.jpg" />
+                                        <Avatar alt={data.firstName} src="/static/images/avatar/2.jpg" />
                                     </IconButton>
                                 </Tooltip>
                                 <Menu
